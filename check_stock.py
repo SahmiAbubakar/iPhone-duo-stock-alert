@@ -37,7 +37,13 @@ def fetch():
 
 
 def notify(topic, store, label):
-    body = f'iPhone Duo {label} is available for pickup at {store}. Confirm on Apple before traveling.'
+
+    body = (
+        f'iPhone Duo {label} is available for pickup at {store}.\n'
+        'Shop on Apple: https://www.apple.com/shop/buy-iphone\n'
+        'Select the matching configuration and confirm pickup before traveling.'
+    )
+
     req = urllib.request.Request(
         f'https://ntfy.sh/{urllib.parse.quote(topic, safe="")}',
         data=body.encode('utf-8'),
