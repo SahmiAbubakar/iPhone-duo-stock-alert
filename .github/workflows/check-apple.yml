@@ -1,0 +1,57 @@
+
+name: Check Apple Inventory Connection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Apple pickup endpoint
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request
+          import urllib.error
+          import json
+
+          url = (
+              "https://www.apple.com/shop/retail/"
+              "pickup-message?pl=true"
+              "&location=08854"
+              "&parts.0=MK1F4LL%2FA"
+          )
+
+          request = urllib.request.Request(
+              url,
+              headers={"User-Agent": "Mozilla/5.0"}
+          )
+
+          try:
+              with urllib.request.urlopen(
+                  request, timeout=25
+              ) as response:
+                  print("HTTP status:", response.status)
+                  data = json.load(response)
+
+              stores = data.get("body", {}).get("stores", [])
+              print("Stores returned:", len(stores))
+
+              for store in stores:
+                  print(
+                      store.get("storeNumber"),
+                      store.get("storeName")
+                  )
+
+              if not stores:
+                  raise RuntimeError(
+                      "No stores returned; inventory unverified"
+                  )
+
+              print("Connection test completed.")
+
+          except urllib.error.HTTPError as error:
+              print("Apple HTTP error:", error.code)
+              raise
+          PY
