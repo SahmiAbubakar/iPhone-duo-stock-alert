@@ -20,7 +20,23 @@ jobs:
       - name: Get repository files
         uses: actions/checkout@v4
 
+      - name: Restore previous stock state
+        uses: actions/cache/restore@v4
+        with:
+          path: stock_state.json
+          key: iphone-duo-stock-${{ github.run_id }}
+          restore-keys: |
+            iphone-duo-stock-
+
       - name: Check stock and notify
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: python3 check_stock.py
+
+      - name: Save stock state
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: stock_state.json
+          key: iphone-duo-stock-${{ github.run_id }}
+
