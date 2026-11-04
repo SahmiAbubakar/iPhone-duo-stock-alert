@@ -15,7 +15,15 @@ PARTS = {
     'MK1Q4LL/A': 'Star White 2TB',
 }
 # Only Menlo Park is verified in the user's requested area so far.
-STORES = {'R067': 'Apple Menlo Park'}
+
+STORES = {
+    'R067': 'Apple Menlo Park',
+    'R104': 'Apple Bridgewater',
+    'R043': 'Apple Short Hills',
+    'R152': 'Apple Staten Island',
+    'R549': 'Apple Quaker Bridge',
+}
+
 STATE = pathlib.Path('stock_state.json')
 
 
