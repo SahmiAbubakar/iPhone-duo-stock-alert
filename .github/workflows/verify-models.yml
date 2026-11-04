@@ -1,0 +1,68 @@
+
+name: Verify iPhone Duo Models
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect Apple inventory response
+        run: |
+          python3 - <<'PY'
+          import json
+          import urllib.parse
+          import urllib.request
+
+          parts = {
+              "MK1F4LL/A": "Night Sky 256GB",
+              "MK1E4LL/A": "Star White 256GB",
+              "MK1H4LL/A": "Night Sky 512GB",
+              "MK1G4LL/A": "Star White 512GB",
+              "MK1L4LL/A": "Night Sky 1TB",
+              "MK1J4LL/A": "Star White 1TB",
+              "MK1R4LL/A": "Night Sky 2TB",
+              "MK1Q4LL/A": "Star White 2TB",
+          }
+
+          params = [("pl", "true"), ("location", "08854")]
+          params += [
+              (f"parts.{i}", part)
+              for i, part in enumerate(parts)
+          ]
+          url = (
+              "https://www.apple.com/shop/retail/"
+              "pickup-message?" + urllib.parse.urlencode(params)
+          )
+
+          req = urllib.request.Request(
+              url, headers={"User-Agent": "Mozilla/5.0"}
+          )
+          with urllib.request.urlopen(req, timeout=30) as r:
+              data = json.load(r)
+
+          stores = data.get("body", {}).get("stores", [])
+          store = next(
+              (s for s in stores
+               if s.get("storeNumber") == "R067"),
+              None
+          )
+          if not store:
+              raise RuntimeError("Menlo Park not returned")
+
+          availability = store.get("partsAvailability", {})
+          print("Store: Menlo Park (R067)")
+
+          for part, label in parts.items():
+              item = availability.get(part)
+              print(
+                  label,
+                  "|", part,
+                  "|", json.dumps(item)
+              )
+              if not isinstance(item, dict):
+                  raise RuntimeError(
+                      f"No inventory record for {part}"
+                  )
+          PY
