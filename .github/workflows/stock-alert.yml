@@ -1,0 +1,26 @@
+
+name: iPhone Duo Stock Alert
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iphone-duo-stock
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get repository files
+        uses: actions/checkout@v4
+
+      - name: Check stock and notify
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 check_stock.py
